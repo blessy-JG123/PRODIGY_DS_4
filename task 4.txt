@@ -1,0 +1,64 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn import tree
+
+
+data_path = r"C:\Users\bless\Downloads\bank+marketing\bank\bank.csv"  # Ensure this path is correct
+
+
+try:
+    df = pd.read_csv(data_path, delimiter=';')  # The Bank Marketing dataset uses ';' as a delimiter
+except FileNotFoundError:
+    print(f"File not found at path: {data_path}")
+    raise
+
+
+print("First few rows of the dataset:")
+print(df.head())
+
+print("\nBasic information about the dataset:")
+print(df.info())
+
+print("\nSummary statistics:")
+print(df.describe(include='all'))
+
+
+print("\nMissing values:")
+print(df.isnull().sum())
+
+
+df_encoded = pd.get_dummies(df, drop_first=True)
+
+
+X = df_encoded.drop('y_yes', axis=1, errors='ignore')  # Drop the target variable if it exists
+y = df_encoded['y_yes']  # Target variable
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+
+clf = DecisionTreeClassifier(random_state=42)
+clf.fit(X_train, y_train)
+
+
+y_pred = clf.predict(X_test)
+
+
+accuracy = accuracy_score(y_test, y_pred)
+print("\nAccuracy:", accuracy)
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+
+plt.figure(figsize=(20, 10))
+tree.plot_tree(clf, feature_names=X.columns, class_names=['No', 'Yes'], filled=True, fontsize=10)
+plt.title('Decision Tree Visualization')
+plt.show()
+
